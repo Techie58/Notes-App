@@ -7,11 +7,49 @@ import 'package:notes_app/utils/my_theme.dart';
 import 'package:notes_app/utils/notes_card_tile.dart';
 
 class HomePage extends StatefulWidget {
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+
+
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearch = false;
+  String _searchQuery = "";
+  List<NotesModel> _filterNotes=[];
+
+
+  void _startSearch(){
+
+    setState(() {
+      _isSearch=true;
+    });
+  }
+
+  void _stopSearch(){
+    setState(() {
+      _isSearch = false;
+      _searchController.clear();
+      _searchQuery = '';
+      _filterNotes = [];
+    });
+  }
+
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      _searchQuery = value.trim().toLowerCase();
+    });
+  }
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+
   void deleteNoteBtnFun(int index) {
     var box = Hive.box<NotesModel>("notesBox");
 
@@ -28,7 +66,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(),
+      appBar: animatedAppBar(_isSearch, _searchController, _onSearchChanged, _stopSearch, _startSearch),
       backgroundColor: Color(0xFF252525),
       floatingActionButton: getFaBtnFun(addNoteBtnFun),
 
@@ -54,9 +92,30 @@ class _HomePageState extends State<HomePage> {
               ),
             );
           }
+          final allNotes = box.values.toList().cast<NotesModel>();
 
-          final notesList = box.values.toList();
-          return getMainListView(context, notesList, box);
+// Filter notes by search text
+          final filteredNotes = _searchQuery.isEmpty
+              ? allNotes
+              : allNotes.where((note) {
+            final title = note.title.toLowerCase();
+            final desc = note.description.toLowerCase();
+            return title.contains(_searchQuery) || desc.contains(_searchQuery);
+          }).toList();
+
+          if (filteredNotes.isEmpty) {
+            return Center(
+              child: Text(
+                _searchQuery.isEmpty
+                    ? "Create your first note!"
+                    : "No matching notes found.",
+                style: const TextStyle(color: Colors.white),
+              ),
+            );
+          }
+
+          return getMainListView(context, filteredNotes, box);
+
         },
       ),
     );
@@ -116,6 +175,7 @@ ListView getMainListView(
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Note deleted'),
+              action: SnackBarAction(label: 'Undo', onPressed: ()=>box.add(note)),
               duration: Duration(seconds: 1),
             ),
           );

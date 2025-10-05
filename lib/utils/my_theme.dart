@@ -19,6 +19,50 @@ ThemeData MyTheme(){
   );
 }
 
+
+AppBar animatedAppBar(bool _isSearching, TextEditingController _searchController, Function _onSearchChanged,VoidCallback _stopSearch,VoidCallback _startSearch){
+  return AppBar(
+  backgroundColor: mainColor,
+  elevation: 0,
+  title: AnimatedSwitcher(
+  duration: const Duration(milliseconds: 250),
+  transitionBuilder: (child, animation) =>
+  SizeTransition(sizeFactor: animation, axis: Axis.horizontal, child: child),
+  child: _isSearching
+  ? TextField(
+  key: const ValueKey('searchField'),
+  controller: _searchController,
+  autofocus: true,
+  style: const TextStyle(color: Colors.white),
+  decoration: const InputDecoration(
+  hintText: 'Search notes...',
+  hintStyle: TextStyle(color: Colors.white54),
+  border: InputBorder.none,
+  ),
+  onChanged:(value) =>  _onSearchChanged(value),
+  )
+      : const Text(
+  'My Notes',
+  key: ValueKey('titleText'),
+  style: TextStyle(color: Colors.white),
+  ),
+  ),
+  actions: [
+  IconButton(
+  icon: Icon(_isSearching ? Icons.close : Icons.search, color: Colors.white),
+  onPressed: () {
+  if (_isSearching) {
+  _stopSearch();
+  } else {
+  _startSearch();
+  }
+  },
+  ),
+  ],
+  );
+
+}
+
 AppBar MyAppBar(){
   return AppBar(
     backgroundColor:Color(0xFF252525) ,
