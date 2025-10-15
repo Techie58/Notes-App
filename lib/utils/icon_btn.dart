@@ -7,9 +7,11 @@ class IconBtn extends StatelessWidget{
 
   final Widget icon;
   VoidCallback? iconBtnFun;
+  final bool isBtnBgColor;
 
 
-  IconBtn({required this.icon, required this.iconBtnFun});
+  IconBtn({super.key, required this.icon, required this.iconBtnFun, this.isBtnBgColor = true});
+
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class IconBtn extends StatelessWidget{
       decoration: BoxDecoration(
 
         borderRadius: BorderRadius.circular(15),
-        color: TransparentGreyColor,
+        color: isBtnBgColor ? greyColor : null,
       ),
       child: IconButton(onPressed: iconBtnFun, icon: icon,color: Colors.white,),
     );

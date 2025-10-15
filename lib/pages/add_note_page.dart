@@ -96,7 +96,7 @@ Row addNoteAppBar(
                   context: context,
                   builder: (context) {
                     return MyAlertDialog(
-                      icon: Icon(Icons.info_outline),
+                      icon: Icon(Icons.info_outline,color: Colors.white,),
                       content: 'Save Changes',
                       deleteNoteBtnFun: () {
                         saveOrUpdateNoteFun(
@@ -142,6 +142,8 @@ void saveOrUpdateNoteFun(
     final note = NotesModel(
       title: titleController.text,
       description: desController.text,
+      Color: randomColor(),
+
     );
 
     isEdit ? box.putAt(noteIndex, note) : box.add(note);

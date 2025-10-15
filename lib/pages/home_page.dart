@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart' show MasonryGridView, SliverSimpleGridDelegateWithFixedCrossAxisCount;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:notes_app/models/notes_model.dart';
 import 'package:notes_app/pages/add_note_page.dart';
@@ -131,11 +132,78 @@ FloatingActionButton getFaBtnFun(VoidCallback? addNoteBtnFun) {
   );
 }
 
-ListView getMainListView(
+MasonryGridView getMainListView(
   BuildContext context,
   List<NotesModel> notesList,
   Box<NotesModel> box,
 ) {
+  return MasonryGridView.builder(
+    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2, // 2 columns
+    ),
+    mainAxisSpacing: 8,
+    crossAxisSpacing: 8,
+    itemCount: notesList.length,
+    itemBuilder: (context, index) {
+      final note = notesList[index];
+      return Dismissible(
+        key: Key(note.title + index.toString()),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          color: Colors.red,
+          alignment: Alignment.centerRight,
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Icon(Icons.delete, color: Colors.white, size: 30),
+        ),
+        confirmDismiss: (direction) async {
+          final result = await showDialog<bool>(
+            barrierDismissible: false,
+            context: context,
+            builder: (context) {
+              return MyAlertDialog(
+                icon: Icon(Icons.delete_forever_outlined, color: Colors.white),
+                content: "Are you sure you want to delete?",
+                deleteNoteBtnFun: () => Navigator.of(context).pop(true),
+                buttonOneText: 'Cancel',
+                buttonTwoText: 'Delete',
+                buttonOneColor: greenColor,
+                buttonTwoColor: Colors.red,
+              );
+            },
+          );
+          return result ?? false;
+        },
+        onDismissed: (direction) {
+          box.deleteAt(index);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Note deleted')),
+          );
+        },
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddNotePage(noteIndex: index, notes: note),
+              ),
+            );
+          },
+          child: NotesCardTile(note,note.Color),
+        ),
+      );
+    },
+  );
+
+
+}
+
+//getMainListView
+ListView listView(
+    BuildContext context,
+    List<NotesModel> notesList,
+    Box<NotesModel> box,
+    ) {
   return ListView.builder(
     itemCount: notesList.length,
     itemBuilder: (context, index) {
@@ -176,7 +244,7 @@ ListView getMainListView(
             SnackBar(
               content: Text('Note deleted'),
               action: SnackBarAction(label: 'Undo', onPressed: ()=>box.add(note)),
-              duration: Duration(seconds: 1),
+              duration: Duration(seconds: 2),
             ),
           );
         },
@@ -188,7 +256,7 @@ ListView getMainListView(
               MaterialPageRoute(builder: (context) => AddNotePage(noteIndex: index,notes: note)),
             );
           },
-          child: NotesCardTile(note),
+          child: NotesCardTile(note,note.Color),
         ),
       );
     },

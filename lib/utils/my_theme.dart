@@ -93,7 +93,7 @@ var TransparentGreyColor=Color(0xFF3B3B3B);
 var greenColor=Color(0xFF30BE71);
 var redColor= Color(0xFFFF0000);
 
-Color randomColor() {
+int randomColor() {
   final Random random = Random();
 
   while (true) {
@@ -105,9 +105,9 @@ Color randomColor() {
     );
 
     // Check brightness
-    // computeLuminance() returns value between 0 (dark) and 1 (bright)
     if (color.computeLuminance() > 0.2) {
-      return color; // accept only if not too dark
+      return color.toARGB32(); // use the new method
     }
   }
 }
+
